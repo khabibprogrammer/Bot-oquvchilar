@@ -1,8 +1,18 @@
 import telebot
 from telebot import types
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+now = datetime.now(ZoneInfo("Asia/Tashkent"))
+# Hozirgi sana-vaqtni olish
+now = datetime.now()
+current_date = now.strftime("%d.%m.%Y")    # 08.12.2025
+current_time = now.strftime("%H:%M:%S")    # 14:35:20
+
+
 
 BOT_TOKEN = "8538888273:AAEvheo3TLnHsnhWXJVRohfJ89k_qq6d6GY"
-CHANNEL_ID = "@bright_future_asakaa"  
+CHANNEL_ID = "@bright_future_asakaa"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -14,36 +24,30 @@ def start_process(chat_id):
 
 
 excel_tasks = [
-    "tasks/excel1.jpg",
-    "tasks/excel2.jpg",
-    "tasks/excel3.jpg",
-    "tasks/excel4.jpg"
+    "excel1.jpg",
+    "excel2.jpg",
+    "excel3.jpg",
+    "excel4.jpg",
+    "excel6.jpg",
+    "excel7.jpg",
+    "excel77.jpg",
+    "excel8.jpg",
+    "excel88.jpg",
+    "excel9.jpg",
+    "excel10.jpg",
+    "excel11.jpg",
+    "excel12.jpg",
 ]
 word_tasks = [
-    "tasks/word1.jpg",
-    "tasks/word2.jpg",
-    "tasks/word3.jpg",
-    "tasks/word4.jpg",
-    "tasks/word5.jpg",
-    "tasks/word6.jpg",
-    "tasks/word7.jpg",
-    "tasks/word8.jpg",
+    "word1.jpg",
+    "word2.jpg",
+    "word3.jpg",
+    "word4.jpg",
+    "word5.jpg",
+    "word6.jpg",
+    "word7.jpg",
+    "word8.jpg",
 ]
-
-powerpoint_tasks = [
-    
-  
-]
-
-
-def task_keyboard(index):
-    keyboard = types.InlineKeyboardMarkup()
-    prev_btn = types.InlineKeyboardButton("◀️ Oldingi", callback_data=f"excel_prev_{index}")
-    next_btn = types.InlineKeyboardButton("▶️ Keyingi", callback_data=f"excel_next_{index}")
-    center_btn = types.InlineKeyboardButton(f"{index+1}/{len(excel_tasks)}", callback_data="none")
-
-    keyboard.row(prev_btn, center_btn, next_btn)
-    return keyboard
 
 def funksiyalar():
     keyboard = types.InlineKeyboardMarkup()
@@ -59,16 +63,77 @@ def funksiyalar():
     keyboard.row(prev_btn, next_btn)
     return keyboard
 
-def main_menu():
+def task_keyboard(index):
+    keyboard = types.InlineKeyboardMarkup()
+    prev_btn = types.InlineKeyboardButton("◀️ Oldingi", callback_data=f"excel_prev_{index}")
+    next_btn = types.InlineKeyboardButton("▶️ Keyingi", callback_data=f"excel_next_{index}")
+    center_btn = types.InlineKeyboardButton(f"{index+1}/{len(excel_tasks)}", callback_data="none")
 
-    kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    kb.add( "Word vazifa","Excel vazifa", "Yodlash uchun")
+    keyboard.row(prev_btn, center_btn, next_btn)
+    return keyboard
+
+def main_menu():
+    kb = types.ReplyKeyboardMarkup(resize_keyboard=True,row_width=3)
+    kb.add( "Word vazifa","Excel vazifa", "Yodlash uchun","💎 vazifa qoshish")
     return kb
 
+def check_subscription(user_id):
+    try:
+        member = bot.get_chat_member(CHANNEL_ID, user_id)
+        return member.status in ["member", "administrator", "creator"]
+    except:
+        return False
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id, "Assalomu alaykum! vazifani rasm yoki video holoatda yuboring", reply_markup=main_menu())
+    user_id = message.from_user.id
+
+    if check_subscription(user_id):
+        bot.send_message(
+            message.chat.id,
+            "Assalomu alaykum! Siz allaqachon obuna bo'lgansiz ✔️\n\nAsosiy menyudan foydalanishingiz mumkin.",
+            reply_markup=main_menu()
+        )
+    else:
+        kb = types.InlineKeyboardMarkup()
+        kb.add(
+            types.InlineKeyboardButton("📢 Kanalga obuna bo‘lish", url=f"https://t.me/{CHANNEL_ID[1:]}"),
+            types.InlineKeyboardButton("✔️ Tasdiqlash", callback_data="check_sub")
+        )
+        bot.send_message(
+            message.chat.id,
+            "❗ Botdan foydalanish uchun quyidagi kanalga obuna bo‘ling:",
+            reply_markup=kb
+        )
+
+# --- Tasdiqlash tugmasini bosganda ---
+@bot.callback_query_handler(func=lambda call: call.data == "check_sub")
+def check_sub(call):
+    user_id = call.from_user.id
+    chat_id = call.message.chat.id
+
+    if check_subscription(user_id):
+        bot.edit_message_text(
+            "🎉 Siz muvaffaqiyatli obuna bo'ldingiz!\n\nAsosiy menyuga xush kelibsiz 👇",
+            chat_id=chat_id,
+            message_id=call.message.message_id,
+            reply_markup=None
+        )
+        bot.send_message(chat_id, "Asosiy menyu:", reply_markup=main_menu())
+    else:
+        kb = types.InlineKeyboardMarkup()
+        kb.add(
+            types.InlineKeyboardButton("📢 Kanalga obuna bo‘lish", url=f"https://t.me/{CHANNEL_ID[1:]}"),
+            types.InlineKeyboardButton("✔️ Yana tekshirish", callback_data="check_sub")
+        )
+        bot.answer_callback_query(call.id, "❌ Obuna topilmadi!")
+        bot.edit_message_text(
+            "❗ Siz hali obuna bo‘lmagansiz. Iltimos, avval obuna bo‘ling.",
+            chat_id=chat_id,
+            message_id=call.message.message_id,
+            reply_markup=kb
+        )
+
 
 def task_keyboard_excel(index):
     keyboard = types.InlineKeyboardMarkup()
@@ -79,20 +144,12 @@ def task_keyboard_excel(index):
     keyboard.row(prev_btn, center_btn, next_btn)
     return keyboard
 
+# --- Word knopkalar ---
 def task_keyboard_word(index):
     keyboard = types.InlineKeyboardMarkup()
     prev_btn = types.InlineKeyboardButton("◀️ Oldingi", callback_data=f"word_prev_{index}")
     next_btn = types.InlineKeyboardButton("▶️ Keyingi", callback_data=f"word_next_{index}")
     center_btn = types.InlineKeyboardButton(f"{index+1}/{len(word_tasks)}", callback_data="word_none")
-
-    keyboard.row(prev_btn, center_btn, next_btn)
-    return keyboard
-
-def task_keyboard_powerpoint(index):
-    keyboard = types.InlineKeyboardMarkup()
-    prev_btn = types.InlineKeyboardButton("◀️ Oldingi", callback_data=f"powerpoint_prev_{index}")
-    next_btn = types.InlineKeyboardButton("▶️ Keyingi", callback_data=f"powerpoint_next_{index}")
-    center_btn = types.InlineKeyboardButton(f"{index+1}/{len(powerpoint_tasks)}", callback_data="powerpoin_none")
 
     keyboard.row(prev_btn, center_btn, next_btn)
     return keyboard
@@ -125,17 +182,6 @@ def word_start(message):
             reply_markup=task_keyboard_word(0)
         )
 
-# @bot.message_handler(func=lambda m: m.text == "PowerPoint vazifa")
-# def word_start(message):
-#     chat_id = message.chat.id
-
-#     with open(powerpoint_tasks[0], "rb") as img:
-#         bot.send_video(
-#             chat_id,
-#             img,
-#             caption="Word vazifa 1",
-#             reply_markup=task_keyboard_word(0)
-#         )
 @bot.message_handler(func=lambda m: m.text == "Yodlash uchun")
 def yodla(message):
     chat_id = message.chat.id
@@ -145,7 +191,6 @@ def yodla(message):
         "Qaysi birini tanlaysiz?",
         reply_markup=funksiyalar()
     )
-
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("excel_"))
@@ -178,6 +223,7 @@ def excel_callbacks(call):
             reply_markup=task_keyboard_excel(new_index)
         )
 
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith("word_"))
 def word_callbacks(call):
     chat_id = call.message.chat.id
@@ -208,61 +254,10 @@ def word_callbacks(call):
             reply_markup=task_keyboard_word(new_index)
         )
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("powerpoint_"))
-def word_callbacks(call):
-    chat_id = call.message.chat.id
-    msg_id = call.message.message_id
-
-    data = call.data.split("_")
-    action = data[1]
-    index = int(data[2])
-
-    if action == "next":
-        new_index = index + 1
-        if new_index >= len(word_tasks):
-            new_index = 0
-
-    elif action == "prev":
-        new_index = index - 1
-        if new_index < 0:
-            new_index = len(word_tasks) - 1
-
-    # Yangi rasmni yuborish
-    with open(word_tasks[new_index], "rb") as img:
-        new_media = types.InputMediaVideo(img, caption=f"Powerpoint vazifa {new_index+1}")
-
-        bot.edit_message_media(
-            media=new_media,
-            chat_id=chat_id,
-            message_id=msg_id,
-            reply_markup=task_keyboard_word(new_index)
-        )
-
 @bot.message_handler(commands=['add'])
 def add(message):
     start_process(message.chat.id)
 
-
-@bot.message_handler(content_types=['photo', 'video','animation'])
-def handle_media(message):
-    chat_id = message.chat.id
-
-    if chat_id in user_data and user_data[chat_id]["step"] == "wait_media":
-
-        if message.content_type == "photo":
-            user_data[chat_id]["media_type"] = "photo"
-            user_data[chat_id]["file_id"] = message.photo[-1].file_id
-
-        elif message.content_type == "video":
-            user_data[chat_id]["media_type"] = "video"
-            user_data[chat_id]["file_id"] = message.video.file_id
-        
-        elif message.content_type == "animation":  
-            user_data[chat_id]["media_type"] = "gif"
-            user_data[chat_id]["file_id"] = message.animation.file_id
-
-        user_data[chat_id]["step"] = "wait_name"
-        bot.send_message(chat_id, "Ism familiyangizni yozing ✍️")
 
 @bot.callback_query_handler(func=lambda call: call.data == "tezkor")
 def word_tezkor(call):
@@ -325,8 +320,34 @@ def excel_funksiyalar(call):
         text,
         parse_mode="Markdown"
     )
+# --- Matn orqali vazifa qo'shish ---
+@bot.message_handler(func=lambda m: m.text.lower() == "💎 vazifa qoshish")
+def add_text(message):
+    start_process(message.chat.id)
 
-    
+@bot.message_handler(content_types=['photo', 'video','animation'])
+def handle_media(message):
+    chat_id = message.chat.id
+
+    if chat_id in user_data and user_data[chat_id]["step"] == "wait_media":
+
+        if message.content_type == "photo":
+            user_data[chat_id]["media_type"] = "photo"
+            user_data[chat_id]["file_id"] = message.photo[-1].file_id
+
+        elif message.content_type == "video":
+            user_data[chat_id]["media_type"] = "video"
+            user_data[chat_id]["file_id"] = message.video.file_id
+
+
+        elif message.content_type == "animation":
+            user_data[chat_id]["media_type"] = "gif"
+            user_data[chat_id]["file_id"] = message.animation.file_id
+
+        user_data[chat_id]["step"] = "wait_name"
+        bot.send_message(chat_id, "Ism familiyangizni yozing ✍️")
+
+
 @bot.message_handler(func=lambda msg: True)
 def handle_name(message):
     chat_id = message.chat.id
@@ -340,27 +361,23 @@ def handle_name(message):
             bot.send_photo(
                 CHANNEL_ID,
                 file_id,
-                caption=f"👤 {full_name}\n bugungi vazifasi\n08.12.2025"
+                caption=f"👤 {full_name}\n bugungi vazifasi\n{current_date}\n⏰ {current_time}"
             )
         elif media_type == "video":
             bot.send_video(
                 CHANNEL_ID,
                 file_id,
-                caption=f"👤 {full_name}\n bugungi vazifasi\n 08.12.2025"
+                caption=f"👤 {full_name}\n bugungi vazifasi\n{current_date}\n⏰ {current_time}"
             )
         elif media_type == "gif":
             bot.send_animation(
                 CHANNEL_ID,
                 file_id,
-                caption=f"👤 {full_name}"
+                caption=f"👤 {full_name} bugungi vazifasi\n{current_date}\n⏰ {current_time}"
             )
 
-
-
-
-        bot.send_message(chat_id, "Ma'lumotlar kanlaga yuborildi! ✅\nYana rasm yoki video yuborish uchun /add bosing.")
+        bot.send_message(chat_id, "Ma'lumotlar ushbu @bright_future_asakaa kanlaga yuborildi! ✅\nYana rasm yoki video yuborish uchun /add bosing.")
 
         user_data.pop(chat_id, None)
 
-
-bot.polling()
+bot.infinity_polling()
